@@ -1,0 +1,25 @@
+# Entornos virtuales de Python
+venv/
+env/
+
+# Secretos y variables de entorno (¡CRÍTICO NO SUBIR ESTO!)
+.env
+
+# Archivos temporales de la API (PDFs subidos)
+uploads/*
+!uploads/.gitkeep
+
+# Caché de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos de bases de datos locales (si llegaras a usar SQLite o mapeos locales)
+*.sqlite3
+*.db
+
+# Archivos de IDEs y OS
+.vscode/
+.idea/
+.DS_Store
