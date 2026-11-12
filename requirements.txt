@@ -8,3 +8,4 @@ langchain-postgres
 psycopg[binary]
 pypdf
 python-dotenv
+gradio
