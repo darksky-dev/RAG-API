@@ -11,14 +11,14 @@ from app.rag_engine import process_and_store_pdf, get_chat_response
 
 app = FastAPI(title="RAG API Portfolio", version="1.0")
 
-# Código de acceso para proteger tu saldo de OpenAI contra bots
+# Access token to protect OpenAI API balance against bots
 DEMO_TOKEN = os.getenv("DEMO_ACCESS_TOKEN", "PORTFOLIO2026")
 
 class ChatRequest(BaseModel):
     question: str
     chat_history: list = []
 
-# --- 1. ENDPOINTS REST (Disponibles en /docs) ---
+# --- 1. REST ENDPOINTS (Available at /docs) ---
 
 @app.post("/upload/")
 async def upload_document(
@@ -59,22 +59,22 @@ async def chat_with_document(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# --- 2. INTERFAZ VISUAL INTERACTIVA (GRADIO) ---
+# --- 2. INTERACTIVE VISUAL INTERFACE (GRADIO) ---
 
 def gradio_upload(pdf_file, token):
     if token.strip() != DEMO_TOKEN:
-        return "❌ Access Token inválido. Ingresa: PORTFOLIO2026"
+        return "❌ Invalid Access Token. Enter: PORTFOLIO2026"
     if pdf_file is None:
-        return "⚠️ Por favor sube un archivo PDF primero."
+        return "⚠️ Please upload a PDF file first."
     try:
         chunks = process_and_store_pdf(pdf_file)
-        return f"✅ PDF indexado con éxito ({chunks} fragmentos guardados en pgvector)."
+        return f"✅ PDF successfully indexed ({chunks} chunks stored in pgvector)."
     except Exception as e:
-        return f"❌ Error al procesar: {str(e)}"
+        return f"❌ Processing error: {str(e)}"
 
 def gradio_chat(user_message, ui_history, lc_history, token):
     if token.strip() != DEMO_TOKEN:
-        ui_history.append([user_message, "❌ Access Token inválido. Ingresa: PORTFOLIO2026 arriba."])
+        ui_history.append([user_message, "❌ Invalid Access Token. Enter PORTFOLIO2026 above."])
         return "", ui_history, lc_history
     if not user_message.strip():
         return "", ui_history, lc_history
@@ -92,30 +92,29 @@ with gr.Blocks(title="Conversational RAG API Demo") as demo:
     gr.Markdown(
         """
         # 📄 Conversational RAG API — Live Portfolio Demo
-        Sube cualquier PDF para vectorizarlo en **PostgreSQL (`pgvector`)** y haz preguntas sobre su contenido usando **LangChain (LCEL)** y **OpenAI (`gpt-4o-mini`)**.
-        * **Recruiter Demo Access Token:** `PORTFOLIO2026` *(Ingrésalo abajo para desbloquear la demo)*
-        * **Swagger REST API Docs:** Disponible en [`/docs`](/docs)
+        Upload any PDF to vectorize it in **PostgreSQL (`pgvector`)** and ask questions about its content using **LangChain (LCEL)** and **OpenAI (`gpt-4o-mini`)**.
+        * **Recruiter Demo Access Token:** `PORTFOLIO2026` *(Enter it below to unlock the demo)*
         """
     )
     
     token_input = gr.Textbox(
-        label="🔑 Access Token (Requerido)", 
-        placeholder="Escribe aquí: PORTFOLIO2026",
+        label="🔑 Access Token", 
+        placeholder="Type here: PORTFOLIO2026",
     )
     
     with gr.Row():
         with gr.Column(scale=1):
-            pdf_input = gr.File(label="1. Sube un documento PDF", file_types=[".pdf"], type="filepath")
-            upload_btn = gr.Button("Indexar PDF en Base de Datos Vectorial", variant="primary")
-            upload_status = gr.Textbox(label="Estado", interactive=False)
+            pdf_input = gr.File(label="1. Upload a PDF document", file_types=[".pdf"], type="filepath")
+            upload_btn = gr.Button("Upload", variant="primary")
+            upload_status = gr.Textbox(label="State", interactive=False)
         
         with gr.Column(scale=2):
-            chatbot = gr.Chatbot(label="2. Conversa con el documento", height=360)
+            chatbot = gr.Chatbot(label="2. Chat with the document", height=360)
             msg_input = gr.Textbox(
-                label="Tu pregunta", 
-                placeholder="Escribe tu pregunta sobre el PDF y presiona Enter..."
+                label="Your question", 
+                placeholder="Type your question about the PDF and press Enter..."
             )
-            clear_btn = gr.Button("Limpiar historial de conversación")
+            clear_btn = gr.Button("Clear conversation history")
 
     lc_history_state = gr.State([])
 
@@ -137,5 +136,5 @@ with gr.Blocks(title="Conversational RAG API Demo") as demo:
         outputs=[chatbot, lc_history_state]
     )
 
-# Montamos Gradio en la raíz sin romper /docs
+# Mount Gradio at the root path without breaking /docs
 app = gr.mount_gradio_app(app, demo, path="/")
