@@ -38,9 +38,18 @@ def get_chat_response(question: str, chat_history: list = None):
     
     # 3. Crear la plantilla del Prompt
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are a helpful assistant. Answer the user's questions based strictly on the following context:\n\n{context}"),
-        MessagesPlaceholder(variable_name="chat_history"),
-        ("human", "{question}")
+        ("system", """You are a highly precise and strict AI data analyst. Your sole purpose is to answer the user's questions based EXCLUSIVELY on the provided document context.
+
+        Follow these rules strictly:
+        1. Analyze the provided context carefully before answering.
+        2. Answer the question using ONLY the information explicitly stated in the context.
+        3. Do NOT use any outside knowledge, make assumptions, or attempt to guess the answer.
+        4. If the context does not explicitly contain the information needed to answer the user's question, you MUST reply exactly with: "The provided document does not contain the answer to this question."
+
+        Context:
+        {context}"""),
+            MessagesPlaceholder(variable_name="chat_history"),
+            ("human", "{question}")
     ])
     
     # 4. Construir y ejecutar la cadena usando LCEL puro (sin langchain.chains)
