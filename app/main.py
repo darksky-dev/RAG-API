@@ -74,17 +74,20 @@ def gradio_upload(pdf_file, token):
 
 def gradio_chat(user_message, ui_history, lc_history, token):
     if token.strip() != DEMO_TOKEN:
-        ui_history.append([user_message, "❌ Invalid Access Token. Enter PORTFOLIO2026 above."])
+        ui_history.append({"role": "user", "content": user_message})
+        ui_history.append({"role": "assistant", "content": "❌ Invalid Access Token. Enter PORTFOLIO2026 above."})
         return "", ui_history, lc_history
     if not user_message.strip():
         return "", ui_history, lc_history
 
     try:
         answer = get_chat_response(user_message, lc_history)
-        lc_history.append([user_message, answer])
-        ui_history.append([user_message, answer])
+        lc_history.append([user_message, answer]) # Formato interno para LangChain
+        ui_history.append({"role": "user", "content": user_message}) # Formato visual para Gradio
+        ui_history.append({"role": "assistant", "content": answer})
     except Exception as e:
-        ui_history.append([user_message, f"❌ Error: {str(e)}"])
+        ui_history.append({"role": "user", "content": user_message})
+        ui_history.append({"role": "assistant", "content": f"❌ Error: {str(e)}"})
 
     return "", ui_history, lc_history
 
